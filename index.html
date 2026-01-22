@@ -120,19 +120,34 @@
       <h2>Ce que je propose</h2>
       <div class="offers reveal">
         <div class="offer-card">
-          <h3><i class="fa-solid fa-book" aria-hidden="true"></i>Revue de littérature</h3>
-          <p>Synthèse critique, 20–30 pages, références validées, structure analytique</p>
-          <p class="price">250 USD</p>
+            <h3><i class="fa-solid fa-book" aria-hidden="true"></i>Revue de littérature</h3>
+            <p>Synthèse critique et structurée de la littérature existante, avec références formatées.</p>
+            <ul>
+              <li><strong>Livrable :</strong> synthèse 15–30 pages (document Word / PDF).</li>
+              <li><strong>Inclus :</strong> tri des sources, cadre thématique, recommandations bibliographiques.</li>
+              <li><strong>Délai indicatif :</strong> 5–10 jours.</li>
+            </ul>
+            <p class="price">250 USD</p>
         </div>
         <div class="offer-card">
-          <h3><i class="fa-solid fa-file-lines" aria-hidden="true"></i>Optimisation mémoire/thèse</h3>
-          <p>Réécriture, restructuration, alignement problématique-méthode-résultats</p>
-          <p class="price">400 USD</p>
+            <h3><i class="fa-solid fa-file-lines" aria-hidden="true"></i>Optimisation mémoire / thèse</h3>
+            <p>Réécriture ciblée, restructuration et alignement problématique‑méthode‑résultats.</p>
+            <ul>
+              <li><strong>Livrable :</strong> document retravaillé avec suggestions inline.</li>
+              <li><strong>Inclus :</strong> plan restructuré, corrections de fond, 1 session de retour.</li>
+              <li><strong>Délai indicatif :</strong> 7–14 jours selon la longueur.</li>
+            </ul>
+            <p class="price">400 USD</p>
         </div>
         <div class="offer-card">
-          <h3><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>Rapport technique ONG/projet</h3>
-          <p>Analyse descriptive, interprétation, graphiques, livrable prêt à soumettre</p>
-          <p class="price">600 USD</p>
+            <h3><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>Rapport technique / ONG / projet</h3>
+            <p>Livrable prêt à soumettre : analyse, graphiques, interprétation claire.</p>
+            <ul>
+              <li><strong>Livrable :</strong> rapport complet avec figures et annexes.</li>
+              <li><strong>Inclus :</strong> relecture, harmonisation des sections, aide à la présentation.</li>
+              <li><strong>Délai indicatif :</strong> 10–20 jours selon l'ampleur.</li>
+            </ul>
+            <p class="price">600 USD</p>
         </div>
       </div>
       <p class="small-note">
@@ -141,33 +156,6 @@
     </div>
   </section>
 
-  <section class="section">
-    <div class="container">
-      <h3 style="margin-top:1.6rem; text-align:center;">Prestations détaillées</h3>
-      <div style="max-width:900px; margin:1rem auto;">
-        <div class="packages">
-          <div class="package-card">
-            <h4>Analyse & Revue</h4>
-            <p>Revue critique complète, synthèse thématique, bibliographie formatée.</p>
-            <ul class="package-features"><li>Livrable : synthèse 15–30 pages</li><li>Délai : 5–10 jours</li></ul>
-            <div class="package-price">250 USD</div>
-          </div>
-          <div class="package-card">
-            <h4>Optimisation mémoire / thèse</h4>
-            <p>Réécriture, restructuration, alignement problématique-méthode-résultats.</p>
-            <ul class="package-features"><li>Livrable : document restructuré</li><li>Délai : 7–14 jours</li></ul>
-            <div class="package-price">400 USD</div>
-          </div>
-          <div class="package-card">
-            <h4>Rapport technique</h4>
-            <p>Analyse descriptive, interprétation, graphiques, livrable prêt à soumettre.</p>
-            <ul class="package-features"><li>Livrable : rapport complet</li><li>Délai : 10–20 jours</li></ul>
-            <div class="package-price">600 USD</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <section class="section">
     <div class="container">
@@ -288,17 +276,9 @@
           <option value="rapport">Rapport technique</option>
         </select>
 
-        <label class="sr-only" for="deadline">Échéance</label>
-        <input id="deadline" type="date" name="deadline" />
+        
 
-        <label class="sr-only" for="budget">Budget indicatif</label>
-        <input id="budget" name="budget" placeholder="Budget indicatif (ex: 300 USD)" />
-
-        <div class="file-row">
-          <label class="sr-only" for="attachment">Joindre un fichier (extrait PDF)</label>
-          <input id="attachment" type="file" name="attachment" accept=".pdf,.doc,.docx" />
-          <div class="file-name" id="attachment-name"></div>
-        </div>
+        <!-- Fichiers : utilisez le formulaire dédié ci-dessous -->
 
         <button type="submit">Envoyer</button>
       </form>
@@ -312,6 +292,26 @@
         ❌ Pas de prix négociables<br>
         ✅ Qualification avant engagement
       </p>
+    </div>
+  </section>
+
+  <section class="section bg-light" id="upload" style="display:none;" aria-hidden="true">
+    <div class="container">
+      <h2>Envoyer un extrait</h2>
+      <p>Si vous souhaitez joindre un extrait (PDF/DOC) pour une première évaluation, utilisez ce formulaire dédié. Le fichier sera envoyé directement vers ma boîte email via EmailJS (config requise).</p>
+      <form id="file-form">
+        <label class="sr-only" for="file-name">Votre nom</label>
+        <input id="file-name" name="from_name" placeholder="Votre nom" required />
+
+        <label class="sr-only" for="file-email">Votre email</label>
+        <input id="file-email" type="email" name="reply_to" placeholder="Votre email" required />
+
+        <label class="sr-only" for="file-attachment">Fichier (PDF/DOC)</label>
+        <input id="file-attachment" type="file" name="attachment" accept=".pdf,.doc,.docx" required />
+
+        <button type="submit">Envoyer le fichier</button>
+      </form>
+      <p class="small-note">Remarque : pour activer l'envoi, créez un compte EmailJS et remplacez les placeholders `YOUR_SERVICE_ID`, `YOUR_TEMPLATE_ID` et initialisez `emailjs.init('YOUR_USER_ID')` dans `script.js`.</p>
     </div>
   </section>
 

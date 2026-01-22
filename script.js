@@ -12,15 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
     scrollProgress.style.width = scrollPercent + '%';
   });
 
-  /* Show selected filename for attachment input */
-  const attachment = document.getElementById('attachment');
-  const attachmentName = document.getElementById('attachment-name');
-  if (attachment && attachmentName) {
-    attachment.addEventListener('change', () => {
-      const f = attachment.files && attachment.files[0];
-      attachmentName.textContent = f ? `${f.name}` : '';
-    });
-  }
+  /* (removed attachment display for main form) */
 
   // Parallax effect on hero
   window.addEventListener('scroll', () => {
@@ -281,6 +273,8 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
+      // No file upload on main contact form — handled by separate upload form
+
       const button = formEl.querySelector('button[type="submit"]') || formEl.querySelector('button');
       const originalText = button ? button.textContent : null;
       if (button) { button.textContent = 'Envoi en cours...'; button.disabled = true; }
@@ -319,6 +313,8 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
+
+  /* File upload via EmailJS removed — upload section hidden */
 
   /* Lazy-load images and background images */
   document.querySelectorAll('img').forEach(img => { try { img.loading = 'lazy'; } catch (e) {} });

@@ -1,5 +1,43 @@
 // script.js
 document.addEventListener('DOMContentLoaded', function () {
+  // Scroll progress indicator
+  const scrollProgress = document.createElement('div');
+  scrollProgress.className = 'scroll-progress';
+  document.body.prepend(scrollProgress);
+  
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    scrollProgress.style.width = scrollPercent + '%';
+  });
+
+  // Parallax effect on hero
+  window.addEventListener('scroll', () => {
+    const hero = document.querySelector('.hero');
+    if (hero) {
+      const scrollY = window.scrollY;
+      hero.style.backgroundPosition = `0% ${scrollY * 0.5}px`;
+    }
+  });
+
+  /* Toast helper: floating messages */
+  const toastContainer = document.getElementById('toast-container');
+  const showToast = (message, type = 'success', ttl = 4200) => {
+    if (!toastContainer) return; 
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.setAttribute('role', 'status');
+    t.innerHTML = `<div class="t-icon">${type === 'success' ? '✅' : '⚠️'}</div><div class="t-body">${message}</div><button class="t-close" aria-label="Fermer">✕</button>`;
+    toastContainer.appendChild(t);
+    const remove = () => {
+      t.classList.add('hide');
+      setTimeout(() => t.remove(), 300);
+    };
+    t.querySelector('.t-close').addEventListener('click', remove);
+    setTimeout(remove, ttl);
+  };
+
   // Smooth scroll for internal anchors
   document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     anchor.addEventListener('click', function (e) {
@@ -62,8 +100,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const track = carousel.querySelector('.carousel-track');
     const items = Array.from(track.querySelectorAll('.carousel-item'));
     let index = 0;
+    
+    // Create dots if not exists
+    let dotsContainer = carousel.querySelector('.carousel-dots');
+    if (!dotsContainer) {
+      dotsContainer = document.createElement('div');
+      dotsContainer.className = 'carousel-dots';
+      carousel.appendChild(dotsContainer);
+      items.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'carousel-dot';
+        if (i === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => show(i));
+        dotsContainer.appendChild(dot);
+      });
+    }
+    
     const show = (i) => {
       items.forEach((it, idx) => it.classList.toggle('active', idx === i));
+      carousel.querySelectorAll('.carousel-dot').forEach((d, idx) => d.classList.toggle('active', idx === i));
     };
     show(index);
 
@@ -174,16 +229,15 @@ document.addEventListener('DOMContentLoaded', function () {
       fetch(formEl.action, { method: 'POST', body: new FormData(formEl), headers: { 'Accept': 'application/json' } })
         .then(function (response) {
           if (response.ok) {
-            const successEl = formEl.querySelector('.form-feedback.success');
-            alert('Merci ! Votre message a été envoyé. Je vous répondrai sous 48h.');
+            showToast("Merci ! Votre message a été envoyé. Je vous répondrai sous 48h.", 'success');
             formEl.reset();
             closeModal();
           } else {
-            alert('Erreur lors de l\'envoi. Réessayez ou contactez via WhatsApp.');
+            showToast("Erreur lors de l'envoi. Réessayez ou contactez via WhatsApp.", 'error');
           }
         })
         .catch(function () {
-          alert('Erreur réseau. Essayez WhatsApp.');
+          showToast('Erreur réseau. Essayez WhatsApp.', 'error');
         })
         .finally(function () {
           if (button) { button.textContent = originalText; button.disabled = false; }

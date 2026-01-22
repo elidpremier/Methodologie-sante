@@ -12,6 +12,16 @@ document.addEventListener('DOMContentLoaded', function () {
     scrollProgress.style.width = scrollPercent + '%';
   });
 
+  /* Show selected filename for attachment input */
+  const attachment = document.getElementById('attachment');
+  const attachmentName = document.getElementById('attachment-name');
+  if (attachment && attachmentName) {
+    attachment.addEventListener('change', () => {
+      const f = attachment.files && attachment.files[0];
+      attachmentName.textContent = f ? `${f.name}` : '';
+    });
+  }
+
   // Parallax effect on hero
   window.addEventListener('scroll', () => {
     const hero = document.querySelector('.hero');
@@ -99,8 +109,10 @@ document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.carousel').forEach(carousel => {
     const track = carousel.querySelector('.carousel-track');
     const items = Array.from(track.querySelectorAll('.carousel-item'));
-    let index = 0;
-    
+
+    // Enable horizontal scroll-snap layout
+    track.classList.add('horizontal');
+
     // Create dots if not exists
     let dotsContainer = carousel.querySelector('.carousel-dots');
     if (!dotsContainer) {
@@ -111,28 +123,59 @@ document.addEventListener('DOMContentLoaded', function () {
         const dot = document.createElement('button');
         dot.className = 'carousel-dot';
         if (i === 0) dot.classList.add('active');
-        dot.addEventListener('click', () => show(i));
+        dot.addEventListener('click', () => {
+          const target = items[i];
+          const left = target.offsetLeft - (track.clientWidth - target.offsetWidth) / 2;
+          track.scrollTo({ left, behavior: 'smooth' });
+        });
         dotsContainer.appendChild(dot);
       });
     }
-    
-    const show = (i) => {
-      items.forEach((it, idx) => it.classList.toggle('active', idx === i));
-      carousel.querySelectorAll('.carousel-dot').forEach((d, idx) => d.classList.toggle('active', idx === i));
-    };
-    show(index);
 
-    const next = () => { index = (index + 1) % items.length; show(index); };
-    const prev = () => { index = (index - 1 + items.length) % items.length; show(index); };
+    // IntersectionObserver to update active dot based on visibility
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const idx = items.indexOf(entry.target);
+          carousel.querySelectorAll('.carousel-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+          items.forEach((it, i) => it.classList.toggle('active', i === idx));
+        }
+      });
+    }, { threshold: 0.6, root: track });
 
+    items.forEach(it => obs.observe(it));
+
+    // Prev/Next controls scroll by one item width
     const nextBtn = carousel.querySelector('.carousel-control.next');
     const prevBtn = carousel.querySelector('.carousel-control.prev');
-    if (nextBtn) nextBtn.addEventListener('click', next);
-    if (prevBtn) prevBtn.addEventListener('click', prev);
+    const scrollByItem = (dir = 1) => {
+      const width = track.clientWidth;
+      track.scrollBy({ left: dir * width, behavior: 'smooth' });
+    };
+    if (nextBtn) nextBtn.addEventListener('click', () => scrollByItem(1));
+    if (prevBtn) prevBtn.addEventListener('click', () => scrollByItem(-1));
 
-    let timer = setInterval(next, 5000);
-    carousel.addEventListener('mouseenter', () => clearInterval(timer));
-    carousel.addEventListener('mouseleave', () => { timer = setInterval(next, 5000); });
+    // Auto-advance: scroll to next item in sequence, loop to start
+    const autoAdvance = () => {
+      let visibleIdx = items.findIndex(it => it.classList.contains('active'));
+      if (visibleIdx === -1) {
+        const center = track.scrollLeft + track.clientWidth / 2;
+        visibleIdx = items.findIndex(it => {
+          const rectLeft = it.offsetLeft;
+          const rectRight = rectLeft + it.offsetWidth;
+          return center >= rectLeft && center <= rectRight;
+        });
+        if (visibleIdx === -1) visibleIdx = 0;
+      }
+      const nextIdx = (visibleIdx + 1) % items.length;
+      const target = items[nextIdx];
+      const left = target.offsetLeft - (track.clientWidth - target.offsetWidth) / 2;
+      track.scrollTo({ left, behavior: 'smooth' });
+    };
+
+    let autoTimer = setInterval(autoAdvance, 5000);
+    carousel.addEventListener('mouseenter', () => clearInterval(autoTimer));
+    carousel.addEventListener('mouseleave', () => { autoTimer = setInterval(autoAdvance, 5000); });
   });
 
   /* Modal contact + sticky CTA */
@@ -183,20 +226,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* Helper: simple validation and feedback */
   const isValidEmail = (em) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
+  const ensureInputId = (input) => {
+    if (!input.id) input.id = 'input-' + Math.random().toString(36).slice(2,9);
+    return input.id;
+  };
+
   const showFeedback = (input, msg) => {
+    const inputId = ensureInputId(input);
     let fb = input.nextElementSibling;
     if (!fb || !fb.classList || !fb.classList.contains('form-feedback')) {
       fb = document.createElement('div');
       fb.className = 'form-feedback';
+      fb.id = `${inputId}-error`;
       input.parentNode.insertBefore(fb, input.nextSibling);
     }
     fb.textContent = msg;
     fb.style.display = 'block';
     input.classList.add('input-error');
+    input.setAttribute('aria-describedby', fb.id);
   };
+
   const clearFeedback = (input) => {
-    const fb = input.nextElementSibling;
-    if (fb && fb.classList && fb.classList.contains('form-feedback')) fb.style.display = 'none';
+    const described = input.getAttribute('aria-describedby');
+    if (described) {
+      const fb = document.getElementById(described);
+      if (fb) fb.style.display = 'none';
+      input.removeAttribute('aria-describedby');
+    } else {
+      const fb = input.nextElementSibling;
+      if (fb && fb.classList && fb.classList.contains('form-feedback')) fb.style.display = 'none';
+    }
     input.classList.remove('input-error');
   };
   const validateForm = (form) => {
@@ -244,6 +303,22 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
   });
+
+  // Debug mode: simulate validation errors to confirm aria-describedby when ?test=aria is present
+  if (window.location.search && window.location.search.indexOf('test=aria') !== -1) {
+    console.info('ARIA test mode: simulating validation errors');
+    document.querySelectorAll('form.contact-form').forEach(f => {
+      // clear values to force required errors
+      f.querySelectorAll('input[required], textarea[required]').forEach(inp => inp.value = '');
+      const ok = validateForm(f);
+      console.info('Form', f.id || '(no id)', 'valid?', ok);
+      const firstInvalid = f.querySelector('.input-error');
+      if (firstInvalid) {
+        firstInvalid.focus();
+        console.info('First invalid input id:', firstInvalid.id, 'aria-describedby:', firstInvalid.getAttribute('aria-describedby'));
+      }
+    });
+  }
 
   /* Lazy-load images and background images */
   document.querySelectorAll('img').forEach(img => { try { img.loading = 'lazy'; } catch (e) {} });
